@@ -1,7 +1,8 @@
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
-use crate::MEMORY_SIZE;
+use crate::{MEMORY_SIZE, xlen};
 
+/// A representation of the registers in the [Cpu][crate::Cpu].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Registers([u64; 32]);
 
@@ -20,14 +21,14 @@ macro_rules! impl_registers {
                 #[doc = $desc]
                 #[doc = "\n"]
                 #[doc = concat!("Get the `", stringify!($abi_get), "` register (", stringify!($r), ")")]
-                pub fn $abi_get(&self) -> u64 {
+                pub fn $abi_get(&self) -> crate::xlen {
                     self.0[$ix]
                 }
 
                 #[doc = $desc]
                 #[doc = "\n"]
                 #[doc = concat!("Set the `", stringify!($abi_get), "` register (", stringify!($r), ")")]
-                pub fn $abi_set(&mut self, $abi_get: u64) {
+                pub fn $abi_set(&mut self, $abi_get: crate::xlen) {
                     self.0[$ix] = $abi_get;
                 }
             )*
@@ -85,9 +86,15 @@ impl Default for Registers {
 }
 
 impl Deref for Registers {
-    type Target = [u64; 32];
+    type Target = [xlen; 32];
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Registers {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
