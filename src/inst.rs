@@ -178,8 +178,18 @@ impl Instruction {
         todo!();
     }
 
+    /// Immediate value for B-type instructions.
+    ///
+    /// (`imm[12|10:5|4:1|11]`)
     pub fn imm_b(&self) -> i32 {
-        todo!();
+        let imm12 = ((self.0 & 0x80000000) >> 31) << 12; // imm[12]
+        let imm10_5 = ((self.0 & 0x7e000000) >> 25) << 5; // imm[10:5]
+        let imm4_1 = ((self.0 & 0x0000001e) >> 7) << 1; // imm[4:1]
+        let imm11 = ((self.0 & 0x00000001) >> 7) << 11; // imm[11]
+
+        let imm = imm12 | imm10_5 | imm4_1 | imm11;
+
+        imm as i32
     }
 
     pub fn imm_u(&self) -> i32 {
@@ -190,18 +200,14 @@ impl Instruction {
     ///
     /// (`imm[20|10:1|11|19:12]`)
     pub fn imm_j(&self) -> i32 {
-        // imm[20]: bit 31 in instruction
-        let imm20 = ((self.0 & 0x80000000) >> 31) << 20; // Sign bit
-        // imm[10:1]: bits 30-21 in instruction
-        let imm10_1 = ((self.0 & 0x7fe00000) >> 21) << 1; // imm[10:1]
-        // imm[11]: bit 20 in instruction
-        let imm11 = ((self.0 & 0x00100000) >> 20) << 11; // imm[11]
-        // imm[19:12]: bits 19-12 in instruction
-        let imm19_12 = ((self.0 & 0x000ff000) >> 12) << 12; // imm[19:12]
+        let imm20 = ((self.0 & 0x80000000) >> 31) << 20;
+        let imm10_1 = ((self.0 & 0x7fe00000) >> 21) << 1;
+        let imm11 = ((self.0 & 0x00100000) >> 20) << 11;
+        let imm19_12 = ((self.0 & 0x000ff000) >> 12) << 12;
 
         // Combine all parts
-        let offset = imm20 | imm10_1 | imm11 | imm19_12;
+        let imm = imm20 | imm10_1 | imm11 | imm19_12;
 
-        offset as i32
+        imm as i32
     }
 }
