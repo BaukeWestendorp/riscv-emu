@@ -89,38 +89,30 @@ pub enum InstructionKind {
     EBreak,
 
     /// Unknown.
-    Unknown(u32),
+    Unknown,
+}
+impl std::fmt::Display for InstructionKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Unknown => f.write_str("<unknown>"),
+            other => f.write_str(&format!("{other:?}").to_ascii_lowercase()),
+        }
+    }
 }
 
 bitfield::bitfield! {
     pub struct Instruction(u32);
 
-    #[inline] pub u8, opcode, _: 6,  0;
-    #[inline] pub u8, into usize,  rd,     _: 11, 7;
-    #[inline] pub u8, into usize,  funct3, _: 14, 12;
-    #[inline] pub u8, into usize,  rs1,    _: 19, 15;
-    #[inline] pub u8, into usize,  rs2,    _: 24, 20;
-    #[inline] pub u8, into usize,  funct7, _: 31, 25;
-
-    #[inline] pub u16, imm_11_0,  _: 31, 20;
-
-    #[inline] pub u16, imm_31_12, _: 31, 12;
-
-    #[inline] pub u16, imm_11_5,  _: 31, 25;
-    #[inline] pub u16, imm_4_0,   _: 11, 7;
-
-    #[inline] pub u16, imm_12,    _: 31;
-    #[inline] pub u16, imm_12_5,  _: 30, 25;
-    #[inline] pub u16, imm_4_1,   _: 11, 7;
-
-    #[inline] pub u16, imm_20,    _: 31;
-    #[inline] pub u16, imm_10_1,  _: 30, 21;
-    #[inline] pub u16, imm_11,    _: 20;
-    #[inline] pub u16, imm_19_12, _: 19, 12;
+    #[inline] pub u32, opcode, _: 6,  0;
+    #[inline] pub u32, rd,     _: 11, 7;
+    #[inline] pub u32, funct3, _: 14, 12;
+    #[inline] pub u32, rs1,    _: 19, 15;
+    #[inline] pub u32, rs2,    _: 24, 20;
+    #[inline] pub u32, funct7, _: 31, 25;
 }
 
 impl Instruction {
-    pub const BYTES: u32 = u32::BITS / 8;
+    pub const BYTES: usize = size_of::<u32>();
 
     pub fn kind(&self) -> InstructionKind {
         match (self.opcode(), self.funct3(), self.funct7()) {
@@ -170,7 +162,46 @@ impl Instruction {
             (0b0000000, 0b110, 0b0110011) => InstructionKind::Or,
             (0b0000000, 0b111, 0b0110011) => InstructionKind::And,
 
-            _ => InstructionKind::Unknown(self.0),
+            _ => InstructionKind::Unknown,
         }
+    }
+
+    /// Immediate value for I-type instructions.
+    ///
+    /// (`imm[11:0]`)
+    pub fn imm_i(&self) -> i32 {
+        let v = self.0 & 0xfff00000 >> 20;
+        v as i32
+    }
+
+    pub fn imm_s(&self) -> i32 {
+        todo!();
+    }
+
+    pub fn imm_b(&self) -> i32 {
+        todo!();
+    }
+
+    pub fn imm_u(&self) -> i32 {
+        todo!();
+    }
+
+    /// Immediate value for J-type instructions.
+    ///
+    /// (`imm[20|10:1|11|19:12]`)
+    pub fn imm_j(&self) -> i32 {
+        // imm[20]: bit 31 in instruction
+        let imm20 = ((self.0 & 0x80000000) >> 31) << 20; // Sign bit
+        // imm[10:1]: bits 30-21 in instruction
+        let imm10_1 = ((self.0 & 0x7fe00000) >> 21) << 1; // imm[10:1]
+        // imm[11]: bit 20 in instruction
+        let imm11 = ((self.0 & 0x00100000) >> 20) << 11; // imm[11]
+        // imm[19:12]: bits 19-12 in instruction
+        let imm19_12 = ((self.0 & 0x000ff000) >> 12) << 12; // imm[19:12]
+
+        // Combine all parts
+        let offset = imm20 | imm10_1 | imm11 | imm19_12;
+
+        offset as i32
     }
 }

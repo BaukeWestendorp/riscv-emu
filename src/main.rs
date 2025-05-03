@@ -11,9 +11,13 @@ pub mod inst;
 pub mod reg;
 pub mod rom;
 
-/// The current width of an x register in bits (either 32 or 64).
+/// The unsigned width of an x register in bits (either u32 or u64).
 #[allow(non_camel_case_types)]
-pub type xlen = u64;
+pub type uxlen = u32;
+
+/// The signed width of an x register in bits (either i32 or i64).
+#[allow(non_camel_case_types)]
+pub type ixlen = i32;
 
 /// A RISC-V emulator.
 #[derive(Debug, Parser)]
@@ -56,8 +60,8 @@ fn main() -> anyhow::Result<()> {
     // Create a ROM from the data in the ELF file.
     let rom = Rom::new(
         &mut bytes[(tohost - start)..(end - start)],
-        start as xlen,
-        end as xlen,
+        start as uxlen,
+        end as uxlen,
     );
 
     // Create and run the CPU cycle loop.

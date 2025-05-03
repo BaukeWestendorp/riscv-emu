@@ -1,13 +1,13 @@
 use std::ops::{Deref, DerefMut};
 
-use crate::xlen;
+use crate::uxlen;
 
 /// A representation of the registers in the [Cpu][crate::Cpu].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Registers([xlen; 32]);
+pub struct Registers([uxlen; 32]);
 
 impl Registers {
-    pub fn new(rom_size: xlen) -> Self {
+    pub fn new(rom_size: uxlen) -> Self {
         let mut this = Self([0; 32]);
 
         // Make sure the x0 register is set to zero.
@@ -36,7 +36,7 @@ macro_rules! impl_registers {
                 #[doc = "\n"]
                 #[doc = concat!("Get the `", stringify!($abi_get), "` register (", stringify!($r), ")")]
                 #[inline]
-                pub fn $abi_get(&self) -> crate::xlen {
+                pub fn $abi_get(&self) -> crate::uxlen {
                     self.0[$ix]
                 }
 
@@ -44,7 +44,7 @@ macro_rules! impl_registers {
                 #[doc = "\n"]
                 #[doc = concat!("Set the `", stringify!($abi_get), "` register (", stringify!($r), ")")]
                 #[inline]
-                pub fn $abi_set(&mut self, $abi_get: crate::xlen) {
+                pub fn $abi_set(&mut self, $abi_get: crate::uxlen) {
                     self.0[$ix] = $abi_get;
                 }
             )*
@@ -88,7 +88,7 @@ impl_registers![
 ];
 
 impl Deref for Registers {
-    type Target = [xlen; 32];
+    type Target = [uxlen; 32];
 
     fn deref(&self) -> &Self::Target {
         &self.0
