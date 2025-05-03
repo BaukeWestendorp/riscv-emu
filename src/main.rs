@@ -1,19 +1,19 @@
-use std::{fs::File, io::Read, path::PathBuf};
+use std::{fs, path::PathBuf};
 
 use anyhow::Context;
 use clap::Parser;
 use cpu::Cpu;
+use goblin::elf::Sym;
+use rom::Rom;
 
 pub mod cpu;
 pub mod inst;
 pub mod reg;
+pub mod rom;
 
 /// The current width of an x register in bits (either 32 or 64).
 #[allow(non_camel_case_types)]
 pub type xlen = u64;
-
-/// The amount of memory in the system in
-pub const MEMORY_SIZE: xlen = 1024 * 1024 * 128; // (128MiB)
 
 /// A RISC-V emulator.
 #[derive(Debug, Parser)]
@@ -27,12 +27,30 @@ struct Args {
 fn main() -> anyhow::Result<()> {
     let args = Args::parse();
 
-    let mut file = File::open(&args.bin).context("Failed to open binary file")?;
-    let mut memory = Vec::new();
-    file.read_to_end(&mut memory)
-        .context("Failed to read file contents into emulator's CPU memory")?;
+    let path = PathBuf::from(args.bin);
+    let mut bytes = fs::read(&path).context("Could not read file.")?;
 
-    Cpu::new(memory).run().context("Error in running CPU")?;
+    let elf = goblin::elf::Elf::parse(&bytes).context("Failed to parse ELF")?;
+    let symbols = &elf.syms;
+    let strtab = &elf.strtab;
+    let get_symbol_value = |name: &str| -> anyhow::Result<Sym> {
+        symbols
+            .iter()
+            .find(|sym| strtab.get_at(sym.st_name).is_some_and(|n| n == name))
+            .with_context(|| format!("Could not find symbol '{name}' in ELF executable"))
+    };
+
+    let start = get_symbol_value("_start")?.st_value as usize;
+    let end = get_symbol_value("_end")?.st_value as usize;
+    let tohost = get_symbol_value("tohost")?.st_value as usize;
+
+    let rom = Rom::new(
+        &mut bytes[(tohost - start)..(end - start)],
+        start as xlen,
+        end as xlen,
+    );
+
+    Cpu::new(&rom).run().context("Error in running CPU")?;
 
     Ok(())
 }

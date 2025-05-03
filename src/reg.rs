@@ -1,10 +1,24 @@
 use std::ops::{Deref, DerefMut};
 
-use crate::{MEMORY_SIZE, xlen};
+use crate::xlen;
 
 /// A representation of the registers in the [Cpu][crate::Cpu].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Registers([u64; 32]);
+pub struct Registers([xlen; 32]);
+
+impl Registers {
+    pub fn new(rom_size: xlen) -> Self {
+        let mut this = Self([0; 32]);
+
+        // Make sure the x0 register is set to zero.
+        this.set_zero(0);
+        // Set the stack pointer to the end of the ROM,
+        // as it grows down into the ROM.
+        this.set_sp(rom_size);
+
+        this
+    }
+}
 
 macro_rules! impl_registers {
     [$({
@@ -70,20 +84,6 @@ impl_registers![
     { ix: 30, r: x30, abi: { get: t5,   set: set_t5   }, desc: "Temporary 5" },
     { ix: 31, r: x31, abi: { get: t6,   set: set_t6   }, desc: "Temporary 6" }
 ];
-
-impl Default for Registers {
-    fn default() -> Self {
-        let mut this = Self([0; 32]);
-
-        // Make sure the x0 register is set to zero.
-        this.set_zero(0);
-        // Set the stack pointer to the end of the memory,
-        // as it grows down into the memory.
-        this.set_sp(MEMORY_SIZE);
-
-        this
-    }
-}
 
 impl Deref for Registers {
     type Target = [xlen; 32];
