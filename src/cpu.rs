@@ -70,6 +70,25 @@ impl<'a> Cpu<'a> {
     fn execute(&mut self, inst: Instruction, addr: uxlen) {
         eprintln!("Executing instruction: {}", inst.kind());
         match inst.kind() {
+            InstructionKind::Lui => {
+                // SPEC: LUI (load upper immediate) is used to build 32-bit constants and uses the U-type format. LUI places
+                //       the 32-bit U-immediate value into the destination register rd, filling in the lowest 12 bits with zeros.
+
+                // NOTE: `imm_u()` returns the immediate value as a u32 with the lowest 12 bits already set to zero.
+                let value = inst.imm_u();
+                self.regs[inst.rd() as usize] = value as uxlen;
+            }
+            InstructionKind::Auipc => {
+                // SPEC: AUIPC (add upper immediate to pc) is used to build pc-relative addresses and uses the U-type format.
+                //       AUIPC forms a 32-bit offset from the U-immediate, filling in the lowest 12 bits with zeros, adds this
+                //       offset to the address of the AUIPC instruction, then places the result in register rd.
+
+                // NOTE: `imm_u()` returns the immediate value as a u32 with the lowest 12 bits already set to zero.
+                let offset = inst.imm_u() as ixlen;
+                let target_addr = (addr as ixlen).wrapping_add(offset) as uxlen;
+                self.regs[inst.rd() as usize] = target_addr;
+            }
+
             InstructionKind::Jal => {
                 // SPEC: JAL stores the
                 //       address of the instruction following the jump ('pc'+4) into register rd. The standard software calling

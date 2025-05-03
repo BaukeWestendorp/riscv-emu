@@ -170,8 +170,8 @@ impl Instruction {
     ///
     /// (`imm[11:0]`)
     pub fn imm_i(&self) -> i32 {
-        let v = self.0 & 0xfff00000 >> 20;
-        v as i32
+        let imm = self.0 & 0xfff00000 >> 20;
+        imm as i32
     }
 
     pub fn imm_s(&self) -> i32 {
@@ -186,14 +186,16 @@ impl Instruction {
         let imm10_5 = ((self.0 & 0x7e000000) >> 25) << 5; // imm[10:5]
         let imm4_1 = ((self.0 & 0x0000001e) >> 7) << 1; // imm[4:1]
         let imm11 = ((self.0 & 0x00000001) >> 7) << 11; // imm[11]
-
         let imm = imm12 | imm10_5 | imm4_1 | imm11;
-
         imm as i32
     }
 
+    /// Immediate value for U-type instructions.
+    ///
+    /// (`imm[31:12]`)
     pub fn imm_u(&self) -> i32 {
-        todo!();
+        let imm = ((self.0 & 0xfffff000) >> 12) << 12;
+        imm as i32
     }
 
     /// Immediate value for J-type instructions.
@@ -204,10 +206,7 @@ impl Instruction {
         let imm10_1 = ((self.0 & 0x7fe00000) >> 21) << 1;
         let imm11 = ((self.0 & 0x00100000) >> 20) << 11;
         let imm19_12 = ((self.0 & 0x000ff000) >> 12) << 12;
-
-        // Combine all parts
         let imm = imm20 | imm10_1 | imm11 | imm19_12;
-
         imm as i32
     }
 }
