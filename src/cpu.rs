@@ -13,7 +13,7 @@ pub struct Cpu<'a> {
     regs: Registers,
     /// The program counter. Holds the address of the current opcode.
     pc: xlen,
-    // FIXME: Move this to a memory bus.
+    /// The ROM containing the program.
     rom: &'a Rom<'a>,
 }
 
@@ -70,7 +70,6 @@ impl<'a> Cpu<'a> {
     /// This is the third step in a CPU cycle.
     fn execute(&mut self, inst: Instruction) {
         match inst.kind() {
-            InstructionKind::Addi => {}
             InstructionKind::Unknown(inst) => panic!("Unknown instruction: {inst:#x?}"),
             kind => todo!("Instruction {kind:?} not implemented"),
         }

@@ -1,4 +1,4 @@
-/// Represents a RISC-V opcode.
+/// Represents a RISC-V instruction.
 #[derive(Debug, Clone, Copy)]
 pub enum InstructionKind {
     /// Load upper immediate.
@@ -94,6 +94,7 @@ pub enum InstructionKind {
 
 bitfield::bitfield! {
     pub struct Instruction(u32);
+
     #[inline] pub u8, opcode, _: 6,  0;
     #[inline] pub u8, into usize,  rd,     _: 11, 7;
     #[inline] pub u8, into usize,  funct3, _: 14, 12;

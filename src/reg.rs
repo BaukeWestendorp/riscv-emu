@@ -35,6 +35,7 @@ macro_rules! impl_registers {
                 #[doc = $desc]
                 #[doc = "\n"]
                 #[doc = concat!("Get the `", stringify!($abi_get), "` register (", stringify!($r), ")")]
+                #[inline]
                 pub fn $abi_get(&self) -> crate::xlen {
                     self.0[$ix]
                 }
@@ -42,6 +43,7 @@ macro_rules! impl_registers {
                 #[doc = $desc]
                 #[doc = "\n"]
                 #[doc = concat!("Set the `", stringify!($abi_get), "` register (", stringify!($r), ")")]
+                #[inline]
                 pub fn $abi_set(&mut self, $abi_get: crate::xlen) {
                     self.0[$ix] = $abi_get;
                 }
