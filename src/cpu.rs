@@ -149,6 +149,14 @@ impl<'a> Cpu<'a> {
                 }
             }
 
+            InstructionKind::Jalr => todo!("JALR instruction not implemented"),
+
+            InstructionKind::Lb => todo!("LB instruction not implemented"),
+            InstructionKind::Lh => todo!("LBU instruction not implemented"),
+            InstructionKind::Lw => todo!("LW instruction not implemented"),
+            InstructionKind::Lbu => todo!("LBU instruction not implemented"),
+            InstructionKind::Lhu => todo!("LHU instruction not implemented"),
+
             InstructionKind::Addi => {
                 // SPEC: ADDI adds the sign-extended 12-bit immediate to register rs1. Arithmetic overflow is ignored and the
                 //       result is simply the low XLEN bits of the result.
@@ -158,11 +166,38 @@ impl<'a> Cpu<'a> {
                 self.regs[inst.rd() as usize] = value as uxlen;
             }
 
+            InstructionKind::Slti => todo!("SLTI instruction not implemented"),
+            InstructionKind::Sltiu => todo!("SLTIU instruction not implemented"),
+            InstructionKind::Xori => todo!("XORI instruction not implemented"),
+            InstructionKind::Ori => todo!("ORI instruction not implemented"),
+            InstructionKind::Andi => todo!("ANDI instruction not implemented"),
+
+            InstructionKind::Sb => todo!("SB instruction not implemented"),
+            InstructionKind::Sh => todo!("SH instruction not implemented"),
+            InstructionKind::Sw => todo!("SW instruction not implemented"),
+
+            InstructionKind::Slli => todo!("SLLI instruction not implemented"),
+            InstructionKind::Srli => todo!("SRLI instruction not implemented"),
+            InstructionKind::Srai => todo!("SRAI instruction not implemented"),
+
+            InstructionKind::Add => todo!("ADD instruction not implemented"),
+            InstructionKind::Sub => todo!("SUB instruction not implemented"),
+            InstructionKind::Sll => todo!("SLL instruction not implemented"),
+            InstructionKind::Slt => todo!("SLT instruction not implemented"),
+            InstructionKind::Sltu => todo!("SLTU instruction not implemented"),
+            InstructionKind::Xor => todo!("XOR instruction not implemented"),
+            InstructionKind::Srl => todo!("SRL instruction not implemented"),
+            InstructionKind::Sra => todo!("SRA instruction not implemented"),
+            InstructionKind::Or => todo!("OR instruction not implemented"),
+            InstructionKind::And => todo!("AND instruction not implemented"),
+
+            InstructionKind::Fence => todo!("FENCE instruction not implemented"),
+            InstructionKind::ECall => todo!("ECALL instruction not implemented"),
+            InstructionKind::EBreak => todo!("EBREAK instruction not implemented"),
+
             InstructionKind::Unknown => {
                 eprintln!("Encountered unknown instruction. Acting as NOP")
             }
-
-            kind => todo!("Instruction {kind} not implemented"),
         }
     }
 }
