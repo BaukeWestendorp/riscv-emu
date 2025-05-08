@@ -39,13 +39,18 @@ impl<'a> Cpu<'a> {
             let inst = self.fetch()?;
 
             // *Decode* the current instruction.
-            let instruction = Instruction(inst);
+            let instruction = self.decode(inst);
 
             // *Execute* the current instruction.
             self.execute(instruction, instruction_addr);
         }
 
         Ok(())
+    }
+
+    /// Decodes the u32 we just fetched into an [Instruction].
+    fn decode(&self, inst: uxlen) -> Instruction {
+        Instruction(inst.to_le())
     }
 
     /// Read the current instruction bytes at the program counter and add step to the next instruction.
