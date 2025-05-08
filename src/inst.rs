@@ -210,3 +210,52 @@ impl Instruction {
         imm as i32
     }
 }
+
+impl std::fmt::Debug for Instruction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let kind = self.kind();
+        match kind {
+            InstructionKind::Lui => write!(f, "",),
+            InstructionKind::Auipc => write!(f, ""),
+            InstructionKind::Jal => write!(f, ""),
+            InstructionKind::Beq => write!(f, ""),
+            InstructionKind::Bne => write!(f, ""),
+            InstructionKind::Blt => write!(f, ""),
+            InstructionKind::Bge => write!(f, ""),
+            InstructionKind::Bltu => write!(f, ""),
+            InstructionKind::Bgeu => write!(f, ""),
+            InstructionKind::Jalr => write!(f, ""),
+            InstructionKind::Lb => write!(f, ""),
+            InstructionKind::Lh => write!(f, ""),
+            InstructionKind::Lw => write!(f, ""),
+            InstructionKind::Lbu => write!(f, ""),
+            InstructionKind::Lhu => write!(f, ""),
+            InstructionKind::Addi => write!(f, ""),
+            InstructionKind::Slti => write!(f, ""),
+            InstructionKind::Sltiu => write!(f, ""),
+            InstructionKind::Xori => write!(f, ""),
+            InstructionKind::Ori => write!(f, ""),
+            InstructionKind::Andi => write!(f, ""),
+            InstructionKind::Sb => write!(f, ""),
+            InstructionKind::Sh => write!(f, ""),
+            InstructionKind::Sw => write!(f, ""),
+            InstructionKind::Slli => write!(f, ""),
+            InstructionKind::Srli => write!(f, ""),
+            InstructionKind::Srai => write!(f, ""),
+            InstructionKind::Add => write!(f, "add rd rs1 rs2"),
+            InstructionKind::Sub => write!(f, ""),
+            InstructionKind::Sll => write!(f, ""),
+            InstructionKind::Slt => write!(f, ""),
+            InstructionKind::Sltu => write!(f, ""),
+            InstructionKind::Xor => write!(f, ""),
+            InstructionKind::Srl => write!(f, ""),
+            InstructionKind::Sra => write!(f, ""),
+            InstructionKind::Or => write!(f, ""),
+            InstructionKind::And => write!(f, ""),
+            InstructionKind::Fence => write!(f, ""),
+            InstructionKind::ECall => write!(f, ""),
+            InstructionKind::EBreak => write!(f, ""),
+            InstructionKind::Unknown => write!(f, ""),
+        }
+    }
+}

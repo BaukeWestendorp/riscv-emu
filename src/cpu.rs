@@ -68,7 +68,7 @@ impl<'a> Cpu<'a> {
     /// Execute the given [Instruction].
     /// This is the third step in a CPU cycle.
     fn execute(&mut self, inst: Instruction, addr: uxlen) {
-        eprintln!("Executing instruction: {}", inst.kind());
+        eprintln!("{:08x?} Executing instruction: {}", self.pc - 4, inst.kind());
         match inst.kind() {
             InstructionKind::Lui => {
                 // SPEC: LUI (load upper immediate) is used to build 32-bit constants and uses the U-type format. LUI places
@@ -176,7 +176,20 @@ impl<'a> Cpu<'a> {
             InstructionKind::Sh => todo!("SH instruction not implemented"),
             InstructionKind::Sw => todo!("SW instruction not implemented"),
 
-            InstructionKind::Slli => todo!("SLLI instruction not implemented"),
+            InstructionKind::Slli => {
+                // SPEC: Shifts by a constant are encoded as a specialization of the I-type format.
+                //       The operand to be shifted is in rs1, and the shift amount is encoded in
+                //       the lower 5 bits of the I-immediate field. The right shift type is
+                //       encoded in bit 30.
+
+                // SPEC: SLLI is a logical left shift (zeros are shifted into the lower bits);
+                let shamt = inst.imm_i() & 0x1F;
+                let value = self.regs[inst.rs1() as usize] << shamt;
+                self.regs[inst.rd() as usize] = value;
+
+                // SPEC: SRLI is a logical right shift (zeros are shifted into the upper bits);
+                // SPEC: SRAI is an arithmetic right shift (the original sign bit is copied into the vacated upper bits).
+            }
             InstructionKind::Srli => todo!("SRLI instruction not implemented"),
             InstructionKind::Srai => todo!("SRAI instruction not implemented"),
 
@@ -195,9 +208,7 @@ impl<'a> Cpu<'a> {
             InstructionKind::ECall => todo!("ECALL instruction not implemented"),
             InstructionKind::EBreak => todo!("EBREAK instruction not implemented"),
 
-            InstructionKind::Unknown => {
-                eprintln!("Encountered unknown instruction. Acting as NOP")
-            }
+            InstructionKind::Unknown => {}
         }
     }
 }
