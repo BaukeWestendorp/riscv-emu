@@ -170,7 +170,7 @@ impl Instruction {
     ///
     /// (`imm[11:0]`)
     pub fn imm_i(&self) -> i32 {
-        let imm = self.0 & 0xfff00000 >> 20;
+        let imm = self.0 >> 20;
         imm as i32
     }
 
@@ -186,7 +186,7 @@ impl Instruction {
         let imm10_5 = ((self.0 & 0x7e000000) >> 25) << 5; // imm[10:5]
         let imm4_1 = ((self.0 & 0x0000001e) >> 7) << 1; // imm[4:1]
         let imm11 = ((self.0 & 0x00000001) >> 7) << 11; // imm[11]
-        let imm = imm12 | imm10_5 | imm4_1 | imm11;
+        let imm = imm12 | imm11 | imm10_5 | imm4_1;
         imm as i32
     }
 
