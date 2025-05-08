@@ -73,7 +73,8 @@ impl<'a> Cpu<'a> {
     /// Execute the given [Instruction].
     /// This is the third step in a CPU cycle.
     fn execute(&mut self, inst: Instruction, addr: uxlen) {
-        eprintln!("{:08x?} Executing instruction: {}", self.pc - 4, inst.kind());
+        eprintln!("${:08x?}: ({:#010x?}) {:?}", self.pc - 4, inst.0, inst);
+
         match inst.kind() {
             InstructionKind::Lui => {
                 // SPEC: LUI (load upper immediate) is used to build 32-bit constants and uses the U-type format. LUI places
