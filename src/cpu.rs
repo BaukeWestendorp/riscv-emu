@@ -96,18 +96,18 @@ impl<'a> Cpu<'a> {
             }
 
             InstructionKind::Jal => {
-                // SPEC: JAL stores the
-                //       address of the instruction following the jump ('pc'+4) into register rd. The standard software calling
+                // SPEC: JAL stores the address of the instruction following the jump ('pc'+4)
+                //       into register rd. The standard software calling
                 //       convention uses 'x1' as the return address register and 'x5' as an alternate link register.
 
-                let offset = inst.imm_j() as ixlen;
+                let offset = inst.imm_j();
                 let target_addr = (addr as ixlen).wrapping_add(offset) as uxlen;
                 self.regs[inst.rd() as usize] = self.pc + Instruction::BYTES as uxlen;
                 self.pc = target_addr;
             }
 
             InstructionKind::Beq => {
-                // BEQ takes the branch if registers rs1 and rs2 are equal.
+                // SPEC: BEQ takes the branch if registers rs1 and rs2 are equal.
 
                 if self.regs[inst.rs1() as usize] == self.regs[inst.rs2() as usize] {
                     let target_addr = self.pc.wrapping_add(inst.imm_b() as uxlen);
@@ -115,7 +115,7 @@ impl<'a> Cpu<'a> {
                 }
             }
             InstructionKind::Bne => {
-                // BNE takes the branch if registers rs1 and rs2 are unequal.
+                // SPEC: BNE takes the branch if registers rs1 and rs2 are unequal.
 
                 if self.regs[inst.rs1() as usize] != self.regs[inst.rs2() as usize] {
                     let target_addr = self.pc.wrapping_add(inst.imm_b() as uxlen);
@@ -123,7 +123,7 @@ impl<'a> Cpu<'a> {
                 }
             }
             InstructionKind::Blt => {
-                // BLT takes the branch if registers rs1 is less than rs2.
+                // SPEC: BLT takes the branch if registers rs1 is less than rs2.
 
                 if self.regs[inst.rs1() as usize] < self.regs[inst.rs2() as usize] {
                     let target_addr = self.pc.wrapping_add(inst.imm_b() as uxlen);
@@ -131,7 +131,7 @@ impl<'a> Cpu<'a> {
                 }
             }
             InstructionKind::Bge => {
-                // BGE takes the branch if registers rs1 is greater than or equal to rs2.
+                // SPEC: BGE takes the branch if registers rs1 is greater than or equal to rs2.
 
                 if self.regs[inst.rs1() as usize] >= self.regs[inst.rs2() as usize] {
                     let target_addr = self.pc.wrapping_add(inst.imm_b() as uxlen);
@@ -139,7 +139,7 @@ impl<'a> Cpu<'a> {
                 }
             }
             InstructionKind::Bltu => {
-                // BLTU takes the branch if registers rs1 is less than rs2.
+                // SPEC: BLTU takes the branch if registers rs1 is less than rs2.
 
                 if self.regs[inst.rs1() as usize] < self.regs[inst.rs2() as usize] {
                     let target_addr = self.pc.wrapping_add(inst.imm_b() as uxlen);
@@ -147,7 +147,7 @@ impl<'a> Cpu<'a> {
                 }
             }
             InstructionKind::Bgeu => {
-                // BGEU takes the branch if registers rs1 is greater than or equal to rs2.
+                // SPEC: BGEU takes the branch if registers rs1 is greater than or equal to rs2.
 
                 if self.regs[inst.rs1() as usize] >= self.regs[inst.rs2() as usize] {
                     let target_addr = self.pc.wrapping_add(inst.imm_b() as uxlen);
