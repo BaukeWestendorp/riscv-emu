@@ -209,15 +209,18 @@ impl<'a> Cpu<'a> {
                 //       encoded in bit 30.
 
                 // SPEC: SLLI is a logical left shift (zeros are shifted into the lower bits);
-                let shamt = inst.imm_i() & 0x1F;
+                let shamt = inst.imm_i() & 0b11111;
                 let value = self.regs[inst.rs1() as usize] << shamt;
                 self.regs[inst.rd() as usize] = value;
-
-                // SPEC: SRLI is a logical right shift (zeros are shifted into the upper bits);
-                // SPEC: SRAI is an arithmetic right shift (the original sign bit is copied into the vacated upper bits).
             }
-            InstructionKind::Srli => todo!("SRLI instruction not implemented"),
-            InstructionKind::Srai => todo!("SRAI instruction not implemented"),
+            InstructionKind::Srli => {
+                // SPEC: SRLI is a logical right shift (zeros are shifted into the upper bits);
+                todo!("SRLI instruction not implemented");
+            }
+            InstructionKind::Srai => {
+                // SPEC: SRAI is an arithmetic right shift (the original sign bit is copied into the vacated upper bits).
+                todo!("SRAI instruction not implemented");
+            }
 
             InstructionKind::Add => todo!("ADD instruction not implemented"),
             InstructionKind::Sub => todo!("SUB instruction not implemented"),
