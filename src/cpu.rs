@@ -43,6 +43,15 @@ impl<'a> Cpu<'a> {
 
             // *Execute* the current instruction.
             self.execute(instruction, instruction_addr);
+
+            // We need to add 4 bytes to the program counter,
+            // as a single instruction is 4 bytes long.
+            self.pc += Instruction::BYTES as uxlen;
+
+            // FIXME: This is temporary. This checks if we are at the end of the `riscv-tests` test.
+            if inst == 0xC0001073 {
+                break;
+            }
         }
 
         Ok(())
@@ -63,17 +72,13 @@ impl<'a> Cpu<'a> {
             self.rom.read(self.pc + 3),
         ];
 
-        // We need to add 4 bytes to the program counter,
-        // as a single instruction is 4 bytes long.
-        self.pc += Instruction::BYTES as uxlen;
-
         Ok(u32::from_le_bytes(bytes))
     }
 
     /// Execute the given [Instruction].
     /// This is the third step in a CPU cycle.
     fn execute(&mut self, inst: Instruction, addr: uxlen) {
-        eprintln!("${:08x?}: ({:#010x?}) {:?}", self.pc - 4, inst.0, inst);
+        eprintln!("${:08x?}: ({:#010x?}) {:?}", self.pc, inst.0, inst);
 
         match inst.kind() {
             InstructionKind::Lui => {
