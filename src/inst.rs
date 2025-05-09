@@ -109,6 +109,8 @@ bitfield::bitfield! {
     #[inline] pub u32, rs1,    _: 19, 15;
     #[inline] pub u32, rs2,    _: 24, 20;
     #[inline] pub u32, funct7, _: 31, 25;
+
+    #[inline] pub u32, funct12, _: 31, 20;
 }
 
 impl Instruction {
@@ -161,6 +163,10 @@ impl Instruction {
             (0b0100000, 0b101, 0b0110011) => InstructionKind::Sra,
             (0b0000000, 0b110, 0b0110011) => InstructionKind::Or,
             (0b0000000, 0b111, 0b0110011) => InstructionKind::And,
+
+            (0b0001111, _, _) => InstructionKind::Fence,
+            (0b1110011, 0b000, _) if self.funct12() == 0 => InstructionKind::ECall,
+            (0b1110011, 0b000, _) if self.funct12() == 1 => InstructionKind::EBreak,
 
             _ => InstructionKind::Unknown,
         }

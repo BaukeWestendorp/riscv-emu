@@ -238,9 +238,9 @@ impl<'a> Cpu<'a> {
             InstructionKind::Or => todo!("OR instruction not implemented"),
             InstructionKind::And => todo!("AND instruction not implemented"),
 
-            InstructionKind::Fence => todo!("FENCE instruction not implemented"),
-            InstructionKind::ECall => todo!("ECALL instruction not implemented"),
-            InstructionKind::EBreak => todo!("EBREAK instruction not implemented"),
+            InstructionKind::Fence => {}
+            InstructionKind::ECall => {}
+            InstructionKind::EBreak => {}
 
             InstructionKind::Unknown => {}
         }
