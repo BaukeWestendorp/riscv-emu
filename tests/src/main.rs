@@ -92,8 +92,18 @@ fn run_test(path: &PathBuf, verbose: bool) -> anyhow::Result<()> {
     // Create and run the CPU cycle loop.
     Cpu::new(&rom, verbose)
         .on_ecall(Box::new(|cpu| {
-            eprintln!("Registers: {:?}", cpu.registers());
-            cpu.abort();
+            // a7 is the syscall register used, 0x5D indicates test status syscall.
+            if cpu.registers().a7() == 0x5D {
+                // a0 indicates the test status.
+                let status = cpu.registers().a0();
+                if status == 0 {
+                    eprintln!("Test Passed!");
+                } else {
+                    let failed_test_num = (status - 1) / 2;
+                    eprintln!("Test {} Failed!", failed_test_num);
+                    cpu.abort();
+                }
+            }
         }))
         .run()
         .context("Error in running CPU")?;

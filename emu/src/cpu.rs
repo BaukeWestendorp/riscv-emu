@@ -80,6 +80,11 @@ impl<'rom> Cpu<'rom> {
             // *Fetch* the current instruction.
             let inst = self.fetch()?;
 
+            // FIXME: This is a temporary solution to stop test programs from running after finishing.
+            if inst == 0xC0001073 {
+                break;
+            }
+
             // *Decode* the current instruction.
             let instruction = self.decode(inst);
 
