@@ -79,10 +79,7 @@ impl<'a> Cpu<'a> {
             InstructionKind::Lui => {
                 // SPEC: LUI (load upper immediate) is used to build 32-bit constants and uses the U-type format. LUI places
                 //       the 32-bit U-immediate value into the destination register rd, filling in the lowest 12 bits with zeros.
-
-                // NOTE: `imm_u()` returns the immediate value as a u32 without the lowest 12 bits set to zero.
-                //       We shift 12 to the left to zero them.
-                let value = inst.imm_u() << 12 as i64;
+                let value = inst.imm_u() & 0x7ffff000;
 
                 // SPEC: The 32-bit result is sign-extended to 64 bits.
                 let value = value as i64;
