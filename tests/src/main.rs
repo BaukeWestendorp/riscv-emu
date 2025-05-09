@@ -86,7 +86,13 @@ fn run_test(path: &PathBuf) -> anyhow::Result<()> {
     let rom = Rom::new(&mut bytes[(tohost - start)..(end - start)], start as uxlen, end as uxlen);
 
     // Create and run the CPU cycle loop.
-    Cpu::new(&rom).run().context("Error in running CPU")?;
+    Cpu::new(&rom)
+        .on_ecall(Box::new(|cpu| {
+            eprintln!("Registers: {:?}", cpu.registers());
+            cpu.abort();
+        }))
+        .run()
+        .context("Error in running CPU")?;
 
     Ok(())
 }

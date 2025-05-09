@@ -1,3 +1,5 @@
+use std::cell::Cell;
+
 use crate::{
     inst::{Instruction, InstructionKind},
     ixlen,
@@ -6,8 +8,9 @@ use crate::{
     uxlen,
 };
 
+type HandleECall = dyn Fn(&Cpu);
+
 /// Represents the RISC-V CPU.
-#[derive(Debug)]
 pub struct Cpu<'rom> {
     /// A small amoumt of fast, general purpouse registers.
     /// Each register has a role defined by the integer register convention.
@@ -16,12 +19,45 @@ pub struct Cpu<'rom> {
     pc: uxlen,
     /// The ROM containing the program.
     rom: &'rom Rom<'rom>,
+
+    /// Whether or not the CPU is currently running.
+    running: Cell<bool>,
+
+    /// A callback function to run when the CPU encounters an ECALL instruction.
+    handle_ecall: Option<Box<HandleECall>>,
 }
 
 impl<'rom> Cpu<'rom> {
     /// Creates a new [Cpu] struct with the given ROM.
     pub fn new(rom: &'rom Rom) -> Self {
-        Self { regs: Registers::new(rom.size()), pc: rom.start_addr(), rom }
+        Self {
+            regs: Registers::new(rom.size()),
+            pc: rom.start_addr(),
+            rom,
+            running: Cell::new(false),
+            handle_ecall: None,
+        }
+    }
+
+    pub fn on_ecall(mut self, f: Box<HandleECall>) -> Self {
+        self.handle_ecall = Some(f);
+        self
+    }
+
+    pub fn registers(&self) -> &Registers {
+        &self.regs
+    }
+
+    pub fn pc(&self) -> uxlen {
+        self.pc
+    }
+
+    pub fn rom(&self) -> &Rom {
+        &self.rom
+    }
+
+    pub fn running(&self) -> bool {
+        self.running.get()
     }
 
     /// Starts the CPU cycle loop. It will infinitely run
@@ -29,7 +65,9 @@ impl<'rom> Cpu<'rom> {
     /// the user stops the emulator explicitly,
     /// or an unrecoverable error is encountered.
     pub fn run(mut self) -> anyhow::Result<()> {
-        while self.pc < self.rom.end_addr() {
+        self.running.set(true);
+
+        while self.pc < self.rom.end_addr() && self.running() {
             // Hard-wire the zero register to 0.
             self.regs.set_zero(0);
 
@@ -47,14 +85,13 @@ impl<'rom> Cpu<'rom> {
             // We need to add 4 bytes to the program counter,
             // as a single instruction is 4 bytes long.
             self.pc += Instruction::BYTES as uxlen;
-
-            // FIXME: This is temporary. This checks if we are at the end of the `riscv-tests` test.
-            if inst == 0xC0001073 {
-                break;
-            }
         }
 
         Ok(())
+    }
+
+    pub fn abort(&self) {
+        self.running.set(false);
     }
 
     /// Decodes the u32 we just fetched into an [Instruction].
@@ -261,7 +298,9 @@ impl<'rom> Cpu<'rom> {
             InstructionKind::And => todo!("AND instruction not implemented"),
 
             InstructionKind::Fence => {}
-            InstructionKind::ECall => {}
+            InstructionKind::ECall => {
+                self.handle_ecall.as_ref().map(|f| f(self));
+            }
             InstructionKind::EBreak => {}
 
             InstructionKind::Unknown => {}
