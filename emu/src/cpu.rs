@@ -1,26 +1,26 @@
 use crate::{
-    Rom,
     inst::{Instruction, InstructionKind},
     ixlen,
     reg::Registers,
+    rom::Rom,
     uxlen,
 };
 
 /// Represents the RISC-V CPU.
 #[derive(Debug)]
-pub struct Cpu<'a> {
+pub struct Cpu<'rom> {
     /// A small amoumt of fast, general purpouse registers.
     /// Each register has a role defined by the integer register convention.
     regs: Registers,
     /// The program counter. Holds the address of the current opcode.
     pc: uxlen,
     /// The ROM containing the program.
-    rom: &'a Rom<'a>,
+    rom: &'rom Rom<'rom>,
 }
 
-impl<'a> Cpu<'a> {
+impl<'rom> Cpu<'rom> {
     /// Creates a new [Cpu] struct with the given ROM.
-    pub fn new(rom: &'a Rom) -> Self {
+    pub fn new(rom: &'rom Rom) -> Self {
         Self { regs: Registers::new(rom.size()), pc: rom.start_addr(), rom }
     }
 

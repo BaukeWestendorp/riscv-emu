@@ -1,0 +1,12 @@
+[package]
+name = "tests"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+emu.workspace = true
+
+anyhow.workspace = true
+bitfield.workspace = true
+clap.workspace = true
+goblin.workspace = true

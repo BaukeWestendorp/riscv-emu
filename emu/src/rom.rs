@@ -1,19 +1,15 @@
 use crate::uxlen;
 
 #[derive(Debug)]
-pub struct Rom<'a> {
-    bytes: &'a mut [u8],
+pub struct Rom<'rom> {
+    bytes: &'rom mut [u8],
     start_addr: uxlen,
     end_addr: uxlen,
 }
 
-impl<'a> Rom<'a> {
-    pub fn new(bytes: &'a mut [u8], start_addr: uxlen, end_addr: uxlen) -> Self {
-        Rom {
-            bytes,
-            start_addr,
-            end_addr,
-        }
+impl<'rom> Rom<'rom> {
+    pub fn new(bytes: &'rom mut [u8], start_addr: uxlen, end_addr: uxlen) -> Self {
+        Rom { bytes, start_addr, end_addr }
     }
 
     #[inline]
