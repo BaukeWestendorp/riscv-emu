@@ -192,16 +192,38 @@ impl<'a> Cpu<'a> {
                 // SPEC: ADDI adds the sign-extended 12-bit immediate to register rs1. Arithmetic overflow is ignored and the
                 //       result is simply the low XLEN bits of the result.
 
-                let value =
-                    (self.regs[inst.rs1() as usize] as ixlen).wrapping_add(inst.imm_i() as ixlen);
+                let imm = inst.imm_i() as ixlen;
+                let rs1 = self.regs[inst.rs1() as usize] as ixlen;
+                let value = rs1.wrapping_add(imm);
                 self.regs[inst.rd() as usize] = value as uxlen;
             }
 
             InstructionKind::Slti => todo!("SLTI instruction not implemented"),
             InstructionKind::Sltiu => todo!("SLTIU instruction not implemented"),
-            InstructionKind::Xori => todo!("XORI instruction not implemented"),
-            InstructionKind::Ori => todo!("ORI instruction not implemented"),
-            InstructionKind::Andi => todo!("ANDI instruction not implemented"),
+            InstructionKind::Xori => {
+                // SPEC: XORI is a logical operations that perform bitwise XOR on register rs1 and
+                //       the sign-extended 12-bit immediate and place the result in rd.
+
+                let rs1 = self.regs[inst.rs1() as usize] as ixlen;
+                let imm = inst.imm_i() as ixlen;
+                self.regs[inst.rd() as usize] = (rs1 ^ imm) as uxlen;
+            }
+            InstructionKind::Ori => {
+                // SPEC: ORI is a logical operations that perform bitwise OR on register rs1 and
+                //       the sign-extended 12-bit immediate and place the result in rd.
+
+                let rs1 = self.regs[inst.rs1() as usize] as ixlen;
+                let imm = inst.imm_i() as ixlen;
+                self.regs[inst.rd() as usize] = (rs1 | imm) as uxlen;
+            }
+            InstructionKind::Andi => {
+                // SPEC: ANDI is a logical operations that perform bitwise AND on register rs1 and
+                //       the sign-extended 12-bit immediate and place the result in rd.
+
+                let rs1 = self.regs[inst.rs1() as usize] as ixlen;
+                let imm = inst.imm_i() as ixlen;
+                self.regs[inst.rd() as usize] = (rs1 & imm) as uxlen;
+            }
 
             InstructionKind::Sb => todo!("SB instruction not implemented"),
             InstructionKind::Sh => todo!("SH instruction not implemented"),
