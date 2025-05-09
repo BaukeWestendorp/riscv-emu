@@ -58,11 +58,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 fn run_test(path: &PathBuf, verbose: bool) -> anyhow::Result<()> {
-    eprintln!("");
-    eprintln!("/--------------------------------------------------------------");
-    eprintln!("| Running test at '{}'...", path.display());
-    eprintln!("\\--------------------------------------------------------------");
-    eprintln!("");
+    eprintln!("Running test at '{}'...", path.display());
     // Get the binary data from the provided file.
     let mut bytes = fs::read(&path).context("Could not read file.")?;
 
