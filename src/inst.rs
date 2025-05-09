@@ -166,48 +166,57 @@ impl Instruction {
         }
     }
 
-    /// Immediate value for I-type instructions.
+    /// Sign-extended immediate value for I-type instructions.
     ///
     /// (`imm[11:0]`)
     pub fn imm_i(&self) -> i32 {
         let imm = self.0 >> 20;
-        imm as i32
+        sign_extend(imm, 12)
     }
 
+    /// Sign-extended immediate value for S-type instructions.
+    ///
+    /// (`imm[11:5|4:0]`)
+    #[rustfmt::skip]
     pub fn imm_s(&self) -> i32 {
-        todo!();
+        let imm11_5 = ((self.0 & 0b10000000000000000000000000000000) >> 31) << 12; // imm[11:5]
+        let imm4_0 =  ((self.0 & 0b01111110000000000000000000000000) >> 25) << 5; // imm[4:0]
+        let imm = imm11_5 | imm4_0;
+        sign_extend(imm, 12)
     }
 
-    /// Immediate value for B-type instructions.
+    /// Sign-extended immediate value for B-type instructions.
     ///
     /// (`imm[12|10:5|4:1|11]`)
+    #[rustfmt::skip]
     pub fn imm_b(&self) -> i32 {
-        let imm12 = ((self.0 & 0x80000000) >> 31) << 12; // imm[12]
-        let imm10_5 = ((self.0 & 0x7e000000) >> 25) << 5; // imm[10:5]
-        let imm4_1 = ((self.0 & 0x0000001e) >> 7) << 1; // imm[4:1]
-        let imm11 = ((self.0 & 0x00000001) >> 7) << 11; // imm[11]
+        let imm12 =   ((self.0 & 0b10000000000000000000000000000000) >> 31) << 12; // imm[12]
+        let imm10_5 = ((self.0 & 0b01111110000000000000000000000000) >> 25) << 5;  // imm[10:5]
+        let imm4_1 =  ((self.0 & 0b00000000000000000000111100000000) >> 8 ) << 1;  // imm[4:1]
+        let imm11 =   ((self.0 & 0b00000000000000000000000010000000) >> 7 ) << 11; // imm[11]
         let imm = imm12 | imm11 | imm10_5 | imm4_1;
-        imm as i32
+        sign_extend(imm, 12)
     }
 
-    /// Immediate value for U-type instructions.
+    /// Sign-extended immediate value for U-type instructions.
     ///
     /// (`imm[31:12]`)
     pub fn imm_u(&self) -> i32 {
-        let imm = ((self.0 & 0xfffff000) >> 12) << 12;
-        imm as i32
+        let imm = self.0 >> 12;
+        sign_extend(imm, 20)
     }
 
-    /// Immediate value for J-type instructions.
+    /// Sign-extended immediate value for J-type instructions.
     ///
     /// (`imm[20|10:1|11|19:12]`)
+    #[rustfmt::skip]
     pub fn imm_j(&self) -> i32 {
-        let imm20 = ((self.0 & 0x80000000) >> 31) << 20;
-        let imm10_1 = ((self.0 & 0x7fe00000) >> 21) << 1;
-        let imm11 = ((self.0 & 0x00100000) >> 20) << 11;
-        let imm19_12 = ((self.0 & 0x000ff000) >> 12) << 12;
-        let imm = imm20 | imm10_1 | imm11 | imm19_12;
-        imm as i32
+        let imm20 =    ((self.0 & 0b10000000000000000000000000000000) >> 31) << 20; // imm[20]
+        let imm10_1 =  ((self.0 & 0b01111111111000000000000000000000) >> 21) << 1;  // imm[10:1]
+        let imm11 =    ((self.0 & 0b00000000000100000000000000000000) >> 20) << 11; // imm[11]
+        let imm19_12 = ((self.0 & 0b00000000000011111111000000000000) >> 12) << 12; // imm[19:12]
+        let imm = imm20 | imm11 | imm10_1 | imm19_12;
+        sign_extend(imm, 20)
     }
 }
 
@@ -260,4 +269,10 @@ impl std::fmt::Debug for Instruction {
             I::Unknown => write!(f, "<unknown instruction>"),
         }
     }
+}
+
+/// Helper function to sign-extend a value after n bits.
+fn sign_extend(value: u32, bits: u32) -> i32 {
+    let shift = 32 - bits;
+    ((value as i32) << shift) >> shift
 }

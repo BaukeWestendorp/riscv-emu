@@ -80,18 +80,27 @@ impl<'a> Cpu<'a> {
                 // SPEC: LUI (load upper immediate) is used to build 32-bit constants and uses the U-type format. LUI places
                 //       the 32-bit U-immediate value into the destination register rd, filling in the lowest 12 bits with zeros.
 
-                // NOTE: `imm_u()` returns the immediate value as a u32 with the lowest 12 bits already set to zero.
-                let value = inst.imm_u();
+                // NOTE: `imm_u()` returns the immediate value as a u32 without the lowest 12 bits set to zero.
+                //       We shift 12 to the left to zero them.
+                let value = inst.imm_u() << 12 as i64;
+
+                // SPEC: The 32-bit result is sign-extended to 64 bits.
+                let value = value as i64;
+
                 self.regs[inst.rd() as usize] = value as uxlen;
             }
             InstructionKind::Auipc => {
                 // SPEC: AUIPC (add upper immediate to pc) is used to build pc-relative addresses and uses the U-type format.
-                //       AUIPC forms a 32-bit offset from the U-immediate, filling in the lowest 12 bits with zeros, adds this
-                //       offset to the address of the AUIPC instruction, then places the result in register rd.
+                //       AUIPC forms a 32-bit offset from the U-immediate, filling in the lowest 12 bits with zeros,
+                let offset = (inst.imm_u() & 0x7ffff000) as ixlen;
 
-                // NOTE: `imm_u()` returns the immediate value as a u32 with the lowest 12 bits already set to zero.
-                let offset = inst.imm_u() as ixlen;
-                let target_addr = (addr as ixlen).wrapping_add(offset) as uxlen;
+                // SPEC: sign-extends the result to 64 bits,
+                let offset = offset as i64;
+
+                // SPEC: adds this offset to the address of the AUIPC instruction,
+                let target_addr = (addr as ixlen).wrapping_add(offset as ixlen) as uxlen;
+
+                // SPEC: then places the result in register rd.
                 self.regs[inst.rd() as usize] = target_addr;
             }
 
