@@ -25,17 +25,21 @@ pub struct Cpu<'rom> {
 
     /// A callback function to run when the CPU encounters an ECALL instruction.
     handle_ecall: Option<Box<HandleECall>>,
+
+    /// Whether to print information about the current instruction for each cycle.
+    verbose: bool,
 }
 
 impl<'rom> Cpu<'rom> {
     /// Creates a new [Cpu] struct with the given ROM.
-    pub fn new(rom: &'rom Rom) -> Self {
+    pub fn new(rom: &'rom Rom, verbose: bool) -> Self {
         Self {
             regs: Registers::new(rom.size()),
             pc: rom.start_addr(),
             rom,
             running: Cell::new(false),
             handle_ecall: None,
+            verbose,
         }
     }
 
@@ -115,7 +119,9 @@ impl<'rom> Cpu<'rom> {
     /// Execute the given [Instruction].
     /// This is the third step in a CPU cycle.
     fn execute(&mut self, inst: Instruction, addr: uxlen) {
-        eprintln!("${:08x?}: ({:#010x?}) {:?}", self.pc, inst.0, inst);
+        if self.verbose {
+            eprintln!("${:08x?}: ({:#010x?}) {:?}", self.pc, inst.0, inst);
+        }
 
         match inst.kind() {
             InstructionKind::Lui => {

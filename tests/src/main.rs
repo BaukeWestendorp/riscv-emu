@@ -16,6 +16,10 @@ struct Args {
     /// The riscv-tests test name.
     #[arg(short, long)]
     test_name: Option<String>,
+
+    /// Prints information about the current instruction for each cycle.
+    #[arg(short, long)]
+    verbose: bool,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -28,7 +32,7 @@ fn main() -> anyhow::Result<()> {
         Some(test_name) => {
             let file_name = format!("rv32ui-p-{test_name}");
             let path = &riscv_tests_path.join(file_name);
-            run_test(path)
+            run_test(path, args.verbose)
                 .with_context(|| format!("Failed to run test at '{}'", path.display()))?;
         }
         None => {
@@ -44,7 +48,7 @@ fn main() -> anyhow::Result<()> {
                 .map(|entry| entry.path());
 
             for path in test_paths {
-                run_test(&path)
+                run_test(&path, args.verbose)
                     .with_context(|| format!("Failed to run test at '{}'", path.display()))?;
             }
         }
@@ -53,7 +57,7 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn run_test(path: &PathBuf) -> anyhow::Result<()> {
+fn run_test(path: &PathBuf, verbose: bool) -> anyhow::Result<()> {
     eprintln!("");
     eprintln!("/--------------------------------------------------------------");
     eprintln!("| Running test at '{}'...", path.display());
@@ -86,7 +90,7 @@ fn run_test(path: &PathBuf) -> anyhow::Result<()> {
     let rom = Rom::new(&mut bytes[(tohost - start)..(end - start)], start as uxlen, end as uxlen);
 
     // Create and run the CPU cycle loop.
-    Cpu::new(&rom)
+    Cpu::new(&rom, verbose)
         .on_ecall(Box::new(|cpu| {
             eprintln!("Registers: {:?}", cpu.registers());
             cpu.abort();
