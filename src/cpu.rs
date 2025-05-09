@@ -102,16 +102,30 @@ impl<'a> Cpu<'a> {
             }
 
             InstructionKind::Jal => {
-                // SPEC: JAL stores the address of the instruction following the jump ('pc'+4)
-                //       into register rd. The standard software calling
-                //       convention uses 'x1' as the return address register and 'x5' as an alternate link register.
+                // SPEC: The jump and link (JAL) instruction uses the J-type format, where the J-immediate encodes a signed
+                //       offset in multiples of 2 bytes.
+                // NOTE: This is because RISC-V instructions are always aligned on 2-byte (16-bit) or 4-byte (32-bit) boundaries.
+                let byte_offset = inst.imm_j() * 2;
 
-                let offset = inst.imm_j();
-                let target_addr = (addr as ixlen).wrapping_add(offset) as uxlen;
+                // SPEC: The offset is sign-extended and added to the address of
+                //       the jump instruction to form the jump target address.
+                //       Jumps can therefore target a ±1 MiB range.
+                let target_addr = (addr as ixlen).wrapping_add(byte_offset) as uxlen;
+
+                // SPEC: JAL stores the address of the instruction following the jump ('pc'+4) into register rd.
                 self.regs[inst.rd() as usize] = self.pc + Instruction::BYTES as uxlen;
                 self.pc = target_addr;
             }
 
+            // SPEC: All branch instructions use the B-type instruction format. The 12-bit B-immediate encodes signed
+            //       offsets in multiples of 2 bytes. The offset is sign-extended and added to the address of the branch
+            //       instruction to give the target address. The conditional branch range is ±4 KiB.
+            //
+            //       Branch instructions compare two registers.
+            //
+            // FIXME: The conditional branch instructions will generate an instruction-address-misaligned exception if the
+            //        target address is not aligned to a four-byte boundary and the branch condition evaluates to true. If the
+            //        branch condition evaluates to false, the instruction-address-misaligned exception will not be raised
             InstructionKind::Beq => {
                 // SPEC: BEQ takes the branch if registers rs1 and rs2 are equal.
 
